@@ -1,0 +1,68 @@
+# @package _global_
+
+defaults:
+  - override /data: b1k_2026_direct_video_flex
+  - override /model: fastwam_flex
+  - _self_
+
+# FastWAM Flex uses fixed full-modality routing over a 32-action, 9-frame window
+# and starts a fresh optimizer timeline from compatible weights.
+batch_size: 32
+num_workers: 8
+prefetch_factor: 1
+persistent_workers: true
+
+model:
+  mot_checkpoint_mixed_attn: true
+
+lr_scheduler_type: cosine
+learning_rate: 2.0e-4
+min_learning_rate: 1.0e-6
+lr_warmup_steps: 3169
+num_epochs: 30
+max_steps: 316950
+log_every: 10
+save_every: 250
+checkpoint_retention:
+  max_to_keep: 2
+  keep_every_n_steps: null
+  keep_final: true
+  # At 104 GPUs with local batch 32, one full-data epoch is 10,565 optimizer steps.
+  permanent_weights_every_n_steps: 10565
+eval_every: 0
+
+fixed_validation:
+  enabled: false
+  steps: []
+  every_steps: 0
+  tasks: 100
+  anchors_per_task: 10
+  anchor_stride: 6
+  seed: 42
+  max_duration_seconds: 900
+
+qualitative_validation:
+  enabled: false
+  steps: []
+  every_steps: 0
+  num_windows: 128
+  expected_tasks: 100
+  videos: 8
+  inference_steps: 10
+  seed: 42
+  fps: 8
+  max_duration_seconds: 900
+
+gradient_accumulation_steps: 1
+mixed_precision: bf16
+max_grad_norm: 1.0
+weight_decay: 1.0e-2
+resume: null
+legacy_warmstart: null
+flex_warmstart: null
+
+wandb:
+  name: b1k_2026_fastwam_flex_3cam_direct384x256_mb32_gc_on_128gpu
+
+tensorboard:
+  enabled: true

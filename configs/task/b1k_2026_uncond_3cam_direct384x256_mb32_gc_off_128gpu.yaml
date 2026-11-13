@@ -1,0 +1,69 @@
+# @package _global_
+
+defaults:
+  - override /data: b1k_2026_direct_video
+  - override /model: fastwam
+  - _self_
+
+# Per-rank input pipeline. The 128-GPU launch uses ZeRO-1 and is selected by
+# scripts/train_zero1.sh rather than this Hydra task config.
+batch_size: 32
+num_workers: 8
+prefetch_factor: 1
+persistent_workers: true
+
+model:
+  mot_checkpoint_mixed_attn: false
+  loss:
+    lambda_video: 1.0
+    lambda_action: 1.0
+
+data:
+  train:
+    numeric_dataset_root: ./data/b1k_2026/numeric_v3
+  val:
+    numeric_dataset_root: ${data.train.numeric_dataset_root}
+
+lr_scheduler_type: cosine
+learning_rate: 2.0e-4
+min_learning_rate: 1.0e-6
+num_epochs: 10
+max_steps: null
+log_every: 10
+save_every: 1000
+checkpoint_retention:
+  max_to_keep: 2
+  keep_every_n_steps: 10000
+  keep_final: true
+# The legacy evaluator runs diffusion inference and writes one MP4 per rank.
+# Formal training uses deterministic distributed loss validation instead.
+eval_every: 0
+
+fixed_validation:
+  enabled: true
+  steps: []
+  # 8,501 complete optimizer steps per epoch at global batch 4,096.
+  every_steps: 8501
+  tasks: 100
+  anchors_per_task: 10
+  anchor_stride: 6
+  seed: 42
+  max_duration_seconds: 900
+
+qualitative_validation:
+  enabled: true
+  steps: []
+  every_steps: 8501
+  num_windows: 128
+  expected_tasks: 100
+  videos: 8
+  inference_steps: 10
+  seed: 42
+  fps: 8
+  max_duration_seconds: 900
+
+gradient_accumulation_steps: 1
+mixed_precision: bf16
+max_grad_norm: 1.0
+weight_decay: 1.0e-2
+resume: null

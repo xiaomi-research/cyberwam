@@ -1,0 +1,59 @@
+train:
+  _target_: fastwam.datasets.b1k.video_dataset.B1KDirectVideoDataset
+  dataset_root: ./data/b1k_2026/v3_source
+  numeric_dataset_root: ./data/b1k_2026/numeric_v3
+  split: train
+  train_all_episodes: true
+  shape_meta: &shape_meta
+    images:
+      - key: rgb.head
+        raw_shape: [3, 720, 720]
+        shape: [3, 720, 720]
+      - key: rgb.left_wrist
+        raw_shape: [3, 480, 480]
+        shape: [3, 480, 480]
+      - key: rgb.right_wrist
+        raw_shape: [3, 480, 480]
+        shape: [3, 480, 480]
+    action:
+      - key: default
+        raw_shape: 23
+        shape: 23
+    state:
+      - key: default
+        raw_shape: 61
+        shape: 23
+  num_frames: 33
+  global_sample_stride: 2
+  window_start_stride: 6
+  action_video_freq_ratio: 4
+  video_size: [384, 256]
+  skip_padding_as_possible: false
+  include_depth: false
+  return_pointmap: true
+  processor:
+    _target_: fastwam.datasets.b1k.processor.B1KFastWAMProcessor
+    shape_meta: ${data.train.shape_meta}
+    num_obs_steps: 33
+    num_image_steps: 9
+    num_output_cameras: 3
+    action_output_dim: 23
+    proprio_output_dim: 23
+    action_state_transforms:
+      - _target_: fastwam.datasets.b1k.contract.B1KActionStateTransform
+    use_stepwise_action_norm: false
+    norm_default_mode: z-score
+    norm_exception_mode: null
+    action_state_merger:
+      _target_: fastwam.datasets.lerobot.transforms.action_state_merger.ConcatLeftAlign
+    train_transforms: []
+    val_transforms: []
+  pretrained_norm_stats: ./data/b1k_2026/norm_stats.json
+  text_embedding_cache_dir: ./data/b1k_2026/text_cache
+  context_len: 128
+  text_cache_size: 128
+  parquet_row_group_cache_size: 0
+  max_open_videos: 16
+  max_decode_gap: 7
+
+val: null

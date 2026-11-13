@@ -1,0 +1,22 @@
+# @package _global_
+
+defaults:
+  - b1k_2026_uncond_3cam_direct384x256_mb32_gc_off_128gpu
+  - _self_
+
+# FastWAM baseline of the technical report: unconditional action prediction with a
+# 2.1 s prediction horizon (33 frames at 30 Hz with stride 2: a 32-step action chunk
+# and 9 video frames, i.e. two future VAE latents). Trained for 10 epochs on 128 GPUs
+# with a local batch of 32 (global batch 4096, 8,501 steps per epoch, 85,010 steps).
+# The parent config uses the 4.3 s horizon (65 frames, 64-step chunk).
+data:
+  train:
+    num_frames: 33
+    processor:
+      num_obs_steps: 33
+      num_image_steps: 9
+  val:
+    num_frames: 33
+    processor:
+      num_obs_steps: 33
+      num_image_steps: 9

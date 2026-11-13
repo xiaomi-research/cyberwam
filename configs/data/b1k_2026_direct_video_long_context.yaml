@@ -1,0 +1,17 @@
+# @package data
+
+defaults:
+  - b1k_2026_direct_video
+  - _self_
+
+train:
+  num_frames: 65
+  processor:
+    num_obs_steps: 65
+    num_image_steps: 17
+
+val:
+  num_frames: 65
+  processor:
+    num_obs_steps: 65
+    num_image_steps: 17

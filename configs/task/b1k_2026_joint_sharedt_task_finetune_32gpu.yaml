@@ -1,0 +1,74 @@
+# @package _global_
+
+defaults:
+  - b1k_2026_joint_3cam_direct384x256_mb32_gc_off_128gpu
+  - _self_
+
+# Per-task (or task-group) FastWAMJoint fine-tune, initialized from a pretrained
+# FastWAMJoint weight-only checkpoint. The job supplies task_indices, max_steps,
+# warmup, permanent checkpoint cadence, and the legacy_warmstart path.
+batch_size: 32
+num_workers: 8
+prefetch_factor: 1
+persistent_workers: true
+num_epochs: 100
+learning_rate: 2.0e-4
+lr_scheduler_type: cosine
+min_learning_rate: 1.0e-6
+max_grad_norm: 1.0
+weight_decay: 1.0e-2
+mixed_precision: bf16
+gradient_accumulation_steps: 1
+log_every: 10
+eval_every: 0
+save_every: 500
+
+model:
+  mot_checkpoint_mixed_attn: true
+  # Per-sample whole-state masking during finetuning; the token and attention
+  # slot remain present, as in pretraining but with a stronger rate.
+  proprio_token_dropout_prob: 0.3
+  # Shared training timestep is valid only because video/action schedules are
+  # explicitly aligned within both train and inference phases.
+  video_scheduler:
+    train_shift: 5.0
+    infer_shift: 5.0
+    num_train_timesteps: 1000
+    shared_train_timestep: true
+  action_scheduler:
+    train_shift: 5.0
+    infer_shift: 5.0
+    num_train_timesteps: 1000
+
+data:
+  train:
+    window_start_stride: 3
+  val:
+    window_start_stride: 3
+
+checkpoint_retention:
+  max_to_keep: 2
+  keep_every_n_steps: null
+  keep_final: false
+  # Group-specific jobs override this to one epoch.
+  permanent_weights_every_n_steps: null
+
+fixed_validation:
+  enabled: false
+
+qualitative_validation:
+  enabled: false
+
+# The first launch warm-starts from the pretrained checkpoint via legacy_warmstart
+# and starts a fresh optimizer, scheduler and step-0 timeline. A retry clears legacy_warmstart and resumes only
+# from this group's own committed full-state checkpoint.
+resume: null
+legacy_warmstart: null
+flex_warmstart: null
+
+wandb:
+  enabled: false
+
+tensorboard:
+  enabled: true
+  archive: true

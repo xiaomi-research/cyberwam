@@ -1,0 +1,121 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - data: null
+  - model: null
+  - task: null
+
+
+output_dir: ./runs/train/${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+# dataloading
+batch_size: 2
+num_workers: 4
+prefetch_factor: 2
+persistent_workers: false
+
+# scheduler
+lr_scheduler_type: "cosine"
+learning_rate: 1.0e-4
+min_learning_rate: null
+lr_warmup_steps: null
+num_epochs: 1
+max_steps: null
+log_every: 10
+save_every: 100
+eval_every: 50
+eval_num_inference_steps: 10
+
+# training
+gradient_accumulation_steps: 1
+mixed_precision: "bf16" # one of: [no, fp16, bf16]
+seed: 42
+max_grad_norm: 1.0
+weight_decay: 0.0
+resume: null
+# Weights-only initialization from a legacy FastWAM .pt file. This is mutually
+# exclusive with resume/flex_warmstart and starts a fresh optimizer at step 0.
+legacy_warmstart: null
+# Weights-only initialization from a FastWAM Flex checkpoint. This strictly
+# restores MoT, proprio, and all Flex adapters, then starts a new timeline.
+flex_warmstart: null
+final_checkpoint_mode: full
+
+# Optional retention for complete full-state + weights checkpoint pairs.
+# Permanent milestone/final pairs do not count against max_to_keep. null for
+# max_to_keep preserves every checkpoint; null/0 for keep_every_n_steps disables
+# milestone retention.
+checkpoint_retention:
+  max_to_keep: null
+  keep_every_n_steps: null
+  keep_final: false
+  # Optional standalone model snapshots. These never include optimizer or
+  # trainer state and live under checkpoints/permanent_weights/.
+  permanent_weights_every_n_steps: null
+
+fixed_validation:
+  enabled: false
+  steps: [0, 250, 500, 750, 1000]
+  # Set to a positive interval for long runs. Step zero is included.
+  every_steps: 0
+  report_dir: null
+  tasks: 100
+  anchors_per_task: 10
+  anchor_stride: 6
+  seed: 42
+  max_duration_seconds: 900
+
+# Deterministic distributed joint video/action inference. Unlike fixed loss
+# validation, step zero is deliberately excluded from periodic scheduling.
+qualitative_validation:
+  enabled: false
+  every_steps: 0
+  steps: []
+  num_windows: 128
+  expected_tasks: 100
+  videos: 8
+  inference_steps: 10
+  seed: 42
+  fps: 8
+  max_duration_seconds: 900
+  report_dir: null
+
+# Optional distributed performance profiling. Disabled by default.
+profiling:
+  enabled: false
+  warmup_steps: 50
+  measure_steps: 100
+  stop_after_profile: true
+  report_path: null
+
+# Strict two-phase checkpoint/resume validation. The profiling job enables this
+# only in its short second phase.
+resume_validation:
+  enabled: false
+  continuation_steps: 5
+  report_path: null
+
+# wandb
+wandb:
+  enabled: false
+  workspace: null
+  project: fast-wam
+  name: train
+  group: null
+  mode: online
+
+# Rank-0 scalar logging. A cluster scheduler may inject TENSORBOARD_LOG_PATH; local runs fall
+# back to <output_dir>/tensorboard. When those differ, archive=true writes both.
+tensorboard:
+  enabled: false
+  archive: true
+  max_queue: 100
+  flush_secs: 30
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null
