@@ -261,6 +261,21 @@ pip install pytest
 PYTHONPATH=.:src pytest tests
 ```
 
+## 📝 Citation
+
+If you find this work useful, please cite the technical report:
+
+```bibtex
+@techreport{li2026cyberwam,
+  title       = {Xiaomi CYBERWAM: Multi-Stream World Action Model for the BEHAVIOR-1K 2026 Challenge},
+  author      = {{Team Cyber}},
+  institution = {Xiaomi Robotics},
+  year        = {2026},
+  note        = {BEHAVIOR Challenge 2026},
+  url         = {https://xiaomi-research.github.io/cyberwam/cyberwam_tech_report.pdf}
+}
+```
+
 ## 🙏 Acknowledgements
 
 CYBERWAM builds on [FastWAM](https://github.com/yuantianyuan01/FastWAM) for the codebase,
